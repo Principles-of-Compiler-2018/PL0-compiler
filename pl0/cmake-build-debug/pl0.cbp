@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6"/>
+	<Project>
+		<Option title="pl0"/>
+		<Option makefile_is_custom="1"/>
+		<Option compiler="gcc"/>
+		<Option virtualFolders="CMake Files\;"/>
+		<Build>
+			<Target title="all">
+				<Option working_dir="/Users/hangyizhe/pl0/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j12 -f &quot;/Users/hangyizhe/pl0/cmake-build-debug/Makefile&quot;  VERBOSE=1 all"/>
+					<CompileFile command="/usr/bin/make -j12 -f &quot;/Users/hangyizhe/pl0/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j12 -f &quot;/Users/hangyizhe/pl0/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j12 -f &quot;/Users/hangyizhe/pl0/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="rebuild_cache">
+				<Option working_dir="/Users/hangyizhe/pl0/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j12 -f &quot;/Users/hangyizhe/pl0/cmake-build-debug/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
+					<CompileFile command="/usr/bin/make -j12 -f &quot;/Users/hangyizhe/pl0/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j12 -f &quot;/Users/hangyizhe/pl0/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j12 -f &quot;/Users/hangyizhe/pl0/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="edit_cache">
+				<Option working_dir="/Users/hangyizhe/pl0/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j12 -f &quot;/Users/hangyizhe/pl0/cmake-build-debug/Makefile&quot;  VERBOSE=1 edit_cache"/>
+					<CompileFile command="/usr/bin/make -j12 -f &quot;/Users/hangyizhe/pl0/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j12 -f &quot;/Users/hangyizhe/pl0/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j12 -f &quot;/Users/hangyizhe/pl0/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="pl0">
+				<Option output="/Users/hangyizhe/pl0/cmake-build-debug/pl0" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/hangyizhe/pl0/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/Users/hangyizhe/pl0/."/>
+					<Add directory="/Library/Developer/CommandLineTools/usr/include/c++/v1"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/Library/Developer/CommandLineTools/usr/lib/clang/10.0.0/include"/>
+					<Add directory="/Library/Developer/CommandLineTools/usr/include"/>
+					<Add directory="/usr/include"/>
+					<Add directory="/System/Library/Frameworks"/>
+					<Add directory="/Library/Frameworks"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j12 -f &quot;/Users/hangyizhe/pl0/cmake-build-debug/Makefile&quot;  VERBOSE=1 pl0"/>
+					<CompileFile command="/usr/bin/make -j12 -f &quot;/Users/hangyizhe/pl0/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j12 -f &quot;/Users/hangyizhe/pl0/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j12 -f &quot;/Users/hangyizhe/pl0/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="pl0/fast">
+				<Option output="/Users/hangyizhe/pl0/cmake-build-debug/pl0" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/Users/hangyizhe/pl0/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/Users/hangyizhe/pl0/."/>
+					<Add directory="/Library/Developer/CommandLineTools/usr/include/c++/v1"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/Library/Developer/CommandLineTools/usr/lib/clang/10.0.0/include"/>
+					<Add directory="/Library/Developer/CommandLineTools/usr/include"/>
+					<Add directory="/usr/include"/>
+					<Add directory="/System/Library/Frameworks"/>
+					<Add directory="/Library/Frameworks"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j12 -f &quot;/Users/hangyizhe/pl0/cmake-build-debug/Makefile&quot;  VERBOSE=1 pl0/fast"/>
+					<CompileFile command="/usr/bin/make -j12 -f &quot;/Users/hangyizhe/pl0/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j12 -f &quot;/Users/hangyizhe/pl0/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j12 -f &quot;/Users/hangyizhe/pl0/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+		</Build>
+		<Unit filename="/Users/hangyizhe/pl0/CMakeLists.txt">
+			<Option target="pl0"/>
+		</Unit>
+		<Unit filename="/Users/hangyizhe/pl0/Debug/example.txt">
+			<Option target="pl0"/>
+		</Unit>
+		<Unit filename="/Users/hangyizhe/pl0/Debug/plcc">
+			<Option target="pl0"/>
+		</Unit>
+		<Unit filename="/Users/hangyizhe/pl0/PL0.h">
+			<Option target="pl0"/>
+		</Unit>
+		<Unit filename="/Users/hangyizhe/pl0/example0.txt">
+			<Option target="pl0"/>
+		</Unit>
+		<Unit filename="/Users/hangyizhe/pl0/example2.txt">
+			<Option target="pl0"/>
+		</Unit>
+		<Unit filename="/Users/hangyizhe/pl0/example3.txt">
+			<Option target="pl0"/>
+		</Unit>
+		<Unit filename="/Users/hangyizhe/pl0/pl0.c">
+			<Option target="pl0"/>
+		</Unit>
+		<Unit filename="/Users/hangyizhe/pl0/pl0.h">
+			<Option target="pl0"/>
+		</Unit>
+		<Unit filename="/Users/hangyizhe/pl0/pl0.out">
+			<Option target="pl0"/>
+		</Unit>
+		<Unit filename="/Users/hangyizhe/pl0/pl0.out.dSYM/Contents/Info.plist">
+			<Option target="pl0"/>
+		</Unit>
+		<Unit filename="/Users/hangyizhe/pl0/pl0.out.dSYM/Contents/Resources/DWARF/pl0.out">
+			<Option target="pl0"/>
+		</Unit>
+		<Unit filename="/Users/hangyizhe/pl0/set.c">
+			<Option target="pl0"/>
+		</Unit>
+		<Unit filename="/Users/hangyizhe/pl0/set.h">
+			<Option target="pl0"/>
+		</Unit>
+		<Unit filename="/Users/hangyizhe/pl0/编译原理和技术实践2017.pdf">
+			<Option target="pl0"/>
+		</Unit>
+		<Unit filename="/Users/hangyizhe/pl0/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\"/>
+		</Unit>
+	</Project>
+</CodeBlocks_project_file>

@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-#define NRW        11     // number of reserved words
+#define NRW        14     // number of reserved words
 #define TXMAX      500    // length of identifier table
 #define MAXNUMLEN  14     // maximum number of digits in numbers
 #define NSYM       10     // maximum number of symbols in array ssym and csym
@@ -40,12 +40,15 @@ enum symtype
 	SYM_END,
 	SYM_IF,
 	SYM_THEN,
+	SYM_ELSE,
 	SYM_WHILE,
 	SYM_DO,
 	SYM_CALL,
 	SYM_CONST,
 	SYM_VAR,
-	SYM_PROCEDURE
+	SYM_PROCEDURE,
+	SYM_BREAK,
+	SYM_CONTINUE
 };
 
 enum idtype
@@ -124,6 +127,10 @@ int  err;
 int  cx;         // index of current instruction to be generated.
 int  level = 0;
 int  tx = 0;
+int  if_break = 0; //判断该层while询循环中是否存在break
+int  break_cx;
+int  if_continue = 0; //判断该层while循环中是否存在continue
+int  continue_cx;
 
 char line[80];
 
@@ -133,13 +140,13 @@ char* word[NRW + 1] =
 {
 	"", /* place holder */
 	"begin", "call", "const", "do", "end","if",
-	"odd", "procedure", "then", "var", "while"
+	"odd", "procedure", "then", "var", "while","else","break","continue"
 };
 
 int wsym[NRW + 1] =
 {
 	SYM_NULL, SYM_BEGIN, SYM_CALL, SYM_CONST, SYM_DO, SYM_END,
-	SYM_IF, SYM_ODD, SYM_PROCEDURE, SYM_THEN, SYM_VAR, SYM_WHILE
+	SYM_IF, SYM_ODD, SYM_PROCEDURE, SYM_THEN, SYM_VAR, SYM_WHILE, SYM_ELSE, SYM_BREAK, SYM_CONTINUE
 };
 
 int ssym[NSYM + 1] =

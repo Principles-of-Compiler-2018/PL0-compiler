@@ -1,5 +1,6 @@
 // pl0 compiler source code
 
+
 #pragma warning(disable:4996)
 
 
@@ -26,18 +27,24 @@ void error(int n)
 } // error
 
 //////////////////////////////////////////////////////////////////////
+//词法分析
+//读取一行中下一个还未读取的字符，并将该字符存放在全局量ch中返回
+//如果该行已读完
+//	1.打印改行的程序
+//	2.读入下一行，并通过ch返回下一行的第一个字符
 void getch(void)
-{
-	if (cc == ll)
+{	
+	//ll是该行总字符数，cc是最后读入的字符的位置
+	if (cc == ll)//该行已经读完，下面开始读新的一行
 	{
-		if (feof(infile))
+		if (feof(infile))//文件已结束，说明文件不完整
 		{
 			printf("\nPROGRAM INCOMPLETE\n");
 			exit(1);
 		}
 		ll = cc = 0;
-		printf("%5d  ", cx);
-		while ( (!feof(infile)) // added & modified by alex 01-02-09
+		printf("%5d  ", cx);//产生一份程序列表，输出相应行号或指令计数器的值
+		while ( (!feof(infile)) //读取新的一行并存放在line中
 			    && ((ch = getc(infile)) != '\n'))
 		{
 			printf("%c", ch);
@@ -46,23 +53,30 @@ void getch(void)
 		printf("\n");
 		line[++ll] = ' ';
 	}
-	ch = line[++cc];
+	ch = line[++cc];//该行未读完，返回该行中的下一个未读取字符
 } // getch
 
 //////////////////////////////////////////////////////////////////////
-// gets a symbol from input stream.
+/*
+识别下一个symbol，并将类别名存放在全局变量sym中
+若该记号为标识符，还将该标识符的字符序列存放在id中
+若为数字，还将该数字的值存放在num中
+*/
 void getsym(void)
 {
 	int i, k;
-	char a[MAXIDLEN + 1];
+	char a[MAXIDLEN + 1]; //a[]用于存放标识符
 
-	while (ch == ' '||ch == '\t')
+	while (ch == ' '||ch == '\t') //跳过分隔符
 		getch();
 
+	//识别保留符和标志符
+	//若为保留字，sym等于该保留字
+	//若为标识符，将标识符序列赋给id，sym置为SYM_IDENTIFIER
 	if (isalpha(ch))
 	{ // symbol is a reserved word or an identifier.
 		k = 0;
-		do
+		do//读取完整的保留符号或标识符
 		{
 			if (k < MAXIDLEN)
 				a[k++] = ch;
@@ -72,13 +86,15 @@ void getsym(void)
 		a[k] = 0;
 		strcpy(id, a);
 		word[0] = id;
-		i = NRW;
+		i = NRW; //NRW: number of reserved words
 		while (strcmp(id, word[i--]));
 		if (++i)
 			sym = wsym[i]; // symbol is a reserved word
 		else
 			sym = SYM_IDENTIFIER;   // symbol is an identifier
 	}
+	//识别数字
+	//将数字的值赋给NUM，sym置为SYM_NUMBER
 	else if (isdigit(ch))
 	{ // symbol is a number.
 		k = num = 0;
@@ -93,6 +109,7 @@ void getsym(void)
 		if (k > MAXNUMLEN)
 			error(25);     // The number is too great.
 	}
+	//识别各类操作符
 	else if (ch == ':')
 	{
 		getch();
@@ -156,20 +173,21 @@ void getsym(void)
 } // getsym
 
 //////////////////////////////////////////////////////////////////////
-// generates (assembles) an instruction.
-void gen(int x, int y, int z)
-{
+//根据输入的三个值组合成下一条汇编代码，并存放在全局数组code[]中
+void gen(int instruction_name, int level_diff, int address)
+{	
 	if (cx > CXMAX)
 	{
 		printf("Fatal Error: Program too long.\n");
 		exit(1);
 	}
-	code[cx].f = x;
-	code[cx].l = y;
-	code[cx++].a = z;
+	code[cx].f = instruction_name;
+	code[cx].l = level_diff;
+	code[cx++].a = address;
 } // gen
 
 //////////////////////////////////////////////////////////////////////
+// test：错误诊断处理
 // tests if error occurs and skips all symbols that do not belongs to s1 or s2.
 void test(symset s1, symset s2, int n)
 {
@@ -188,7 +206,7 @@ void test(symset s1, symset s2, int n)
 //////////////////////////////////////////////////////////////////////
 int dx;  // data allocation index
 
-// enter object(constant, variable or procedre) into table.
+//enter()：读入待添加符号的类型，然后向符号表中添加新的符号，以及新符号的有关属性
 void enter(int kind)
 {
 	mask* mk;
@@ -198,20 +216,20 @@ void enter(int kind)
 	table[tx].kind = kind;
 	switch (kind)
 	{
-	case ID_CONSTANT:
+	case ID_CONSTANT:	//如果是常数则将该常数的值加到符号表中
 		if (num > MAXADDRESS)
 		{
 			error(25); // The number is too great.
 			num = 0;
 		}
-		table[tx].value = num;
+		table[tx].value = num; 
 		break;
-	case ID_VARIABLE:
+	case ID_VARIABLE:	//如果是变量则将该变量定义点的静态层次level和偏移量dx添加到符号表中
 		mk = (mask*) &table[tx];
 		mk->level = level;
 		mk->address = dx++;
 		break;
-	case ID_PROCEDURE:
+	case ID_PROCEDURE: //如果是过程，则将过程的静态层次添加到符号表中
 		mk = (mask*) &table[tx];
 		mk->level = level;
 		break;
@@ -219,7 +237,7 @@ void enter(int kind)
 } // enter
 
 //////////////////////////////////////////////////////////////////////
-// locates identifier in symbol table.
+//返回符号在符号表中的下标
 int position(char* id)
 {
 	int i;
@@ -230,6 +248,9 @@ int position(char* id)
 } // position
 
 //////////////////////////////////////////////////////////////////////
+//constdeclaration():进行常量的声明
+//	先检测输入的代码是否符合常量声明的格式
+//	若符合，则将该常量的符号名和数值添加到符号表中去
 void constdeclaration()
 {
 	if (sym == SYM_IDENTIFIER)
@@ -240,7 +261,7 @@ void constdeclaration()
 			if (sym == SYM_BECOMES)
 				error(1); // Found ':=' when expecting '='.
 			getsym();
-			if (sym == SYM_NUMBER)
+			if (sym == SYM_NUMBER)//输入格式正确，将该常量添加到符号表中
 			{
 				enter(ID_CONSTANT);
 				getsym();
@@ -259,6 +280,8 @@ void constdeclaration()
 } // constdeclaration
 
 //////////////////////////////////////////////////////////////////////
+//vardeclaration()：进行变量的声明
+//	将变量添加到符号表中
 void vardeclaration(void)
 {
 	if (sym == SYM_IDENTIFIER)
@@ -273,6 +296,7 @@ void vardeclaration(void)
 } // vardeclaration
 
 //////////////////////////////////////////////////////////////////////
+//listcode：每一个分程序（过程）编译结束后，列出该部分的PL0程序代码
 void listcode(int from, int to)
 {
 	int i;
@@ -286,6 +310,9 @@ void listcode(int from, int to)
 } // listcode
 
 //////////////////////////////////////////////////////////////////////
+//factor()：匹配非终结符factor(因子)的合适的产生式
+//	对“因子”进行翻译
+//	产生相应的汇编代码
 void factor(symset fsys)
 {
 	void expression(symset fsys);
@@ -296,7 +323,7 @@ void factor(symset fsys)
 
 	if (inset(sym, facbegsys))
 	{
-		if (sym == SYM_IDENTIFIER)
+		if (sym == SYM_IDENTIFIER)// 如果读入的是identifier，则情况为：因子 -> ident
 		{
 			if ((i = position(id)) == 0)
 			{
@@ -307,31 +334,34 @@ void factor(symset fsys)
 				switch (table[i].kind)
 				{
 					mask* mk;
-				case ID_CONSTANT:
+				case ID_CONSTANT:	//如果该ident是常数名则产生“将常数的值置于栈顶“的汇编代码
 					gen(LIT, 0, table[i].value);
 					break;
-				case ID_VARIABLE:
+				case ID_VARIABLE:	//如果该ident是变量名则产生“将该变量的值置于栈顶”的汇编代码
 					mk = (mask*) &table[i];
 					gen(LOD, level - mk->level, mk->address);
 					break;
-				case ID_PROCEDURE:
+				case ID_PROCEDURE:	//如果该ident是过程名则报错
 					error(21); // Procedure identifier can not be in an expression.
 					break;
 				} // switch
 			}
 			getsym();
 		}
-		else if (sym == SYM_NUMBER)
+		else if (sym == SYM_NUMBER) //如果是数字，则情况为：因子 -> 数字
+									//则产生“将该数字置于栈顶”的汇编代码
 		{
 			if (num > MAXADDRESS)
 			{
 				error(25); // The number is too great.
 				num = 0;
 			}
-			gen(LIT, 0, num);
+			gen(LIT, 0, num); 
 			getsym();
 		}
-		else if (sym == SYM_LPAREN)
+		else if (sym == SYM_LPAREN)// 如果是读入的是左括号，则情况为：因子 -> ( expression )
+									//则读入做括号后对expression进行翻译
+									//然后在匹配 )
 		{
 			getsym();
 			set = uniteset(createset(SYM_RPAREN, SYM_NULL), fsys);
@@ -346,17 +376,21 @@ void factor(symset fsys)
 				error(22); // Missing ')'.
 			}
 		}
-		else if(sym == SYM_MINUS) // UMINUS,  Expr -> '-' Expr
+		else if(sym == SYM_MINUS) // 如果读入的是 -，则情况为：因子 -> - 因子
+									//在对“因子”进行翻译
+									//再产生“将单目运算符 - 置于栈顶”的汇编代码
 		{  
 			 getsym();
 			 factor(fsys);
-			 gen(OPR, 0, OPR_NEG);
+			 gen(OPR, 0, OPR_NEG); //将单目运算符 - 置于栈顶
 		}
 		test(fsys, createset(SYM_LPAREN, SYM_NULL), 23);
 	} // if
 } // factor
 
 //////////////////////////////////////////////////////////////////////
+//term():匹配非终结符term合适的产生式
+//	对term进行递归下降翻译
 void term(symset fsys)
 {
 	int mulop;
@@ -364,24 +398,26 @@ void term(symset fsys)
 	
 	set = uniteset(fsys, createset(SYM_TIMES, SYM_SLASH, SYM_NULL));
 	factor(set);
-	while (sym == SYM_TIMES || sym == SYM_SLASH)
+	while (sym == SYM_TIMES || sym == SYM_SLASH) //如果读到了 * 或者 /，则不能选择 term -> factor进行匹配 
 	{
 		mulop = sym;
 		getsym();
-		factor(set);
+		factor(set); //对 * 或 / 后面的内容按照factor的产生式进行匹配
 		if (mulop == SYM_TIMES)
 		{
-			gen(OPR, 0, OPR_MUL);
+			gen(OPR, 0, OPR_MUL); 	//产生相应的汇编代码
 		}
 		else
 		{
-			gen(OPR, 0, OPR_DIV);
+			gen(OPR, 0, OPR_DIV);	//产生相应的汇编代码
 		}
 	} // while
 	destroyset(set);
 } // term
 
 //////////////////////////////////////////////////////////////////////
+// expression():对非终结符expression进行递归下降翻译
+//	并产生相应的汇编代码
 void expression(symset fsys)
 {
 	int addop;
@@ -389,19 +425,19 @@ void expression(symset fsys)
 
 	set = uniteset(fsys, createset(SYM_PLUS, SYM_MINUS, SYM_NULL));
 	
-	term(set);
-	while (sym == SYM_PLUS || sym == SYM_MINUS)
+	term(set); //对term进行递归下降翻译
+	while (sym == SYM_PLUS || sym == SYM_MINUS)//如果读到了 + 或者 -，则不能选择 expression -> term进行匹配 
 	{
 		addop = sym;
 		getsym();
-		term(set);
+		term(set);	//对 + 或 - 后面的内容按照term的产生式进行递归下降翻译
 		if (addop == SYM_PLUS)
 		{
-			gen(OPR, 0, OPR_ADD);
+			gen(OPR, 0, OPR_ADD);	//产生相应的汇编代码
 		}
 		else
 		{
-			gen(OPR, 0, OPR_MIN);
+			gen(OPR, 0, OPR_MIN);	//产生相应的汇编代码
 		}
 	} // while
 
@@ -409,21 +445,23 @@ void expression(symset fsys)
 } // expression
 
 //////////////////////////////////////////////////////////////////////
+// condition()：对非终结符condition进行递归下降翻译
+//	并产生相应的汇编代码
 void condition(symset fsys)
 {
 	int relop;
 	symset set;
 
-	if (sym == SYM_ODD)
+	if (sym == SYM_ODD)// 如果读入的是odd，则按照产生式condition -> odd expression进行翻译
 	{
 		getsym();
 		expression(fsys);
 		gen(OPR, 0, 6);
 	}
-	else
+	else	//否则按照产生式 condition -> expression =/<>/</>/<=/>= expression 进行翻译
 	{
 		set = uniteset(relset, fsys);
-		expression(set);
+		expression(set);// 先对第一个expression进行递归翻译
 		destroyset(set);
 		if (! inset(sym, relset))
 		{
@@ -433,8 +471,8 @@ void condition(symset fsys)
 		{
 			relop = sym;
 			getsym();
-			expression(fsys);
-			switch (relop)
+			expression(fsys); //再对第而个expression进行递归翻译
+			switch (relop)// 匹配相应的操作符，并产生相应的汇编代码
 			{
 			case SYM_EQU:
 				gen(OPR, 0, OPR_EQU);
@@ -460,12 +498,15 @@ void condition(symset fsys)
 } // condition
 
 //////////////////////////////////////////////////////////////////////
+// statement()：对非终结符statememt进行递归下降翻译
+//	并产生相应的汇编代码
 void statement(symset fsys)
 {
 	int i, cx1, cx2;
 	symset set1, set;
 
-	if (sym == SYM_IDENTIFIER)
+
+	if (sym == SYM_IDENTIFIER)// 如果读入的是ident，则按照产生式statement -> ident := expression进行递归下降翻译
 	{ // variable assignment
 		mask* mk;
 		if (! (i = position(id)))
@@ -486,14 +527,14 @@ void statement(symset fsys)
 		{
 			error(13); // ':=' expected.
 		}
-		expression(fsys);
+		expression(fsys); //对 := 后对expression进行递归下降翻译
 		mk = (mask*) &table[i];
 		if (i)
 		{
-			gen(STO, level - mk->level, mk->address);
+			gen(STO, level - mk->level, mk->address); //产生相应的汇编代码
 		}
 	}
-	else if (sym == SYM_CALL)
+	else if (sym == SYM_CALL)	//如果读入的是call，则按照产生式 statement -> call ident 进行递归下降翻译
 	{ // procedure call
 		getsym();
 		if (sym != SYM_IDENTIFIER)
@@ -510,7 +551,7 @@ void statement(symset fsys)
 			{
 				mask* mk;
 				mk = (mask*) &table[i];
-				gen(CAL, level - mk->level, mk->address);
+				gen(CAL, level - mk->level, mk->address);	//产生相应的会汇编代码
 			}
 			else
 			{
@@ -519,36 +560,57 @@ void statement(symset fsys)
 			getsym();
 		}
 	} 
-	else if (sym == SYM_IF)
+	else if (sym == SYM_IF)	//如果读入的是if，则按照产生式statement -> if condition then statement进行递归下降翻译
 	{ // if statement
 		getsym();
-		set1 = createset(SYM_THEN, SYM_DO, SYM_NULL);
+		set1 = createset(SYM_THEN, SYM_DO, SYM_ELSE, SYM_NULL);
 		set = uniteset(set1, fsys);
-		condition(set);
-		destroyset(set1);
+		condition(set);	//对if后的condition进行递归下降翻译
+		destroyset(set1);	
 		destroyset(set);
 		if (sym == SYM_THEN)
 		{
+			//printf("Read then");
 			getsym();
+			
 		}
 		else
 		{
 			error(16); // 'then' expected.
 		}
 		cx1 = cx;
-		gen(JPC, 0, 0);
-		statement(fsys);
-		code[cx1].a = cx;	
+		gen(JPC, 0, 0);	//产生相应的汇编代码
+		statement(fsys);	//对then后面的statement进行递归下降翻译
+
+		//printf("Read statement after then");
+		//printf("%d", sym);
+
+		//getsym();
+		cx2 = cx;
+		gen( JMP, 0, 0);
+
+		code[cx1].a = cx;	//产生条件语句语句不满足时的跳转地址
+		
+		if( sym == SYM_ELSE ){	//为else语句添加翻译过程
+			//printf("Read else");
+			getsym();
+			statement( fsys );
+			code[cx2].a = cx;	//if条件满足时，执行完相关代码后的跳转地址
+		}
+		//else getsym();
+		
 	}
-	else if (sym == SYM_BEGIN)
+	else if (sym == SYM_BEGIN)	//如果读到的是begin，则按照产生式statement -> begin statement_sequence end 进行递归下降翻译
 	{ // block
 		getsym();
 		set1 = createset(SYM_SEMICOLON, SYM_END, SYM_NULL);
 		set = uniteset(set1, fsys);
-		statement(set);
-		while (sym == SYM_SEMICOLON || inset(sym, statbegsys))
+
+		//对statemnt_sequence按照产生式statemnt_sequence -> statement(;statement)* 进行递归下降翻译
+		statement(set);	//先对产生式右部的第一个statement进行递归下降翻译
+		while (sym == SYM_SEMICOLON || inset(sym, statbegsys))	//在对(;statement)*进行递归下降翻译
 		{
-			if (sym == SYM_SEMICOLON)
+			if (sym == SYM_SEMICOLON) //匹配;
 			{
 				getsym();
 			}
@@ -560,7 +622,7 @@ void statement(symset fsys)
 		} // while
 		destroyset(set1);
 		destroyset(set);
-		if (sym == SYM_END)
+		if (sym == SYM_END)	//匹配end
 		{
 			getsym();
 		}
@@ -569,13 +631,13 @@ void statement(symset fsys)
 			error(17); // ';' or 'end' expected.
 		}
 	}
-	else if (sym == SYM_WHILE)
+	else if (sym == SYM_WHILE)	//如果读入的是while，则按照产生式statement -> while conditoin do statement进行递归下降翻译
 	{ // while statement
 		cx1 = cx;
 		getsym();
 		set1 = createset(SYM_DO, SYM_NULL);
 		set = uniteset(set1, fsys);
-		condition(set);
+		condition(set);	//对condition进行递归下降翻译
 		destroyset(set1);
 		destroyset(set);
 		cx2 = cx;
@@ -588,14 +650,39 @@ void statement(symset fsys)
 		{
 			error(18); // 'do' expected.
 		}
-		statement(fsys);
-		gen(JMP, 0, cx1);
-		code[cx2].a = cx;
+		statement(fsys);	//对do后面的statement进行递归下降翻译
+		gen(JMP, 0, cx1);	//产生“跳转至while语句的条件判断代码”的汇编代码
+		code[cx2].a = cx;	//产生当while语句的条件不满足时跳转的地址
+		if( if_break == 1 ){
+			if_break = 0;
+			code[ break_cx ].a = cx; 
+		}
+		if( if_continue == 1 ){
+			if_continue = 0;
+			code[ continue_cx ].a = cx1;
+		}
+	}
+	else if ( sym == SYM_BREAK ){
+		//printf("Read break");
+		getsym();
+		//getsym();
+		if_break = 1;
+		break_cx = cx;
+		gen( JMP, 0, 0);
+	}
+	else if ( sym == SYM_CONTINUE ){
+		printf("Read Continue");
+		getsym();
+		if_continue = 1;
+		continue_cx = cx;
+		gen(JMP, 0, 0);
 	}
 	test(fsys, phi, 19);
 } // statement
 			
 //////////////////////////////////////////////////////////////////////
+// block()：对非终结符block进行递归下降分析
+//	并产生相应的汇编代码
 void block(symset fsys)
 {
 	int cx0; // initial code index
@@ -604,7 +691,7 @@ void block(symset fsys)
 	int savedTx;
 	symset set1, set;
 
-	dx = 3;
+	dx = 3;	//每个数据区包含三个内部变量RA, DL, SL
 	block_dx = dx;
 	mk = (mask*) &table[tx];
 	mk->address = cx;
@@ -615,7 +702,7 @@ void block(symset fsys)
 	}
 	do
 	{
-		if (sym == SYM_CONST)
+		if (sym == SYM_CONST)	//如果读入的是const，则按照产生式block -> const (ident = number ,)* ident = number;进行递归下降分析
 		{ // constant declarations
 			getsym();
 			do
@@ -638,7 +725,7 @@ void block(symset fsys)
 			while (sym == SYM_IDENTIFIER);
 		} // if
 
-		if (sym == SYM_VAR)
+		if (sym == SYM_VAR)	//如果读入的是var，则按照产生式block -> var (ident, )* ident;进行递归下降分析
 		{ // variable declarations
 			getsym();
 			do
@@ -661,7 +748,7 @@ void block(symset fsys)
 			while (sym == SYM_IDENTIFIER);
 		} // if
 		block_dx = dx; //save dx before handling procedure call!
-		while (sym == SYM_PROCEDURE)
+		while (sym == SYM_PROCEDURE)	//如果读入的是procedure，则按照产生式block -> procedure ident ; block ;对进行递归下降分析
 		{ // procedure declarations
 			getsym();
 			if (sym == SYM_IDENTIFIER)
@@ -732,6 +819,7 @@ void block(symset fsys)
 } // block
 
 //////////////////////////////////////////////////////////////////////
+// base()：根据currentlevel和levelDiff沿静态链查找，并返回某一数据区的地址
 int base(int stack[], int currentLevel, int levelDiff)
 {
 	int b = currentLevel;
@@ -882,7 +970,7 @@ void main ()
 	
 	// create begin symbol sets
 	declbegsys = createset(SYM_CONST, SYM_VAR, SYM_PROCEDURE, SYM_NULL);
-	statbegsys = createset(SYM_BEGIN, SYM_CALL, SYM_IF, SYM_WHILE, SYM_NULL);
+	statbegsys = createset(SYM_BEGIN, SYM_CALL, SYM_IF, SYM_WHILE, SYM_NULL, SYM_BREAK, SYM_CONTINUE, SYM_IDENTIFIER);
 	facbegsys = createset(SYM_IDENTIFIER, SYM_NUMBER, SYM_LPAREN, SYM_MINUS, SYM_NULL);
 
 	err = cc = cx = ll = 0; // initialize global variables
