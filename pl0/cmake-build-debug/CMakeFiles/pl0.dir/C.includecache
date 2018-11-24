@@ -1,0 +1,38 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/Users/hangyizhe/pl0/PL0.h
+stdio.h
+-
+
+/Users/hangyizhe/pl0/pl0.c
+stdio.h
+-
+stdlib.h
+-
+string.h
+-
+ctype.h
+-
+PL0.h
+/Users/hangyizhe/pl0/PL0.h
+set.c
+/Users/hangyizhe/pl0/set.c
+
+/Users/hangyizhe/pl0/set.c
+stdlib.h
+-
+stdio.h
+-
+stdarg.h
+-
+set.h
+/Users/hangyizhe/pl0/set.h
+
+/Users/hangyizhe/pl0/set.h
+
